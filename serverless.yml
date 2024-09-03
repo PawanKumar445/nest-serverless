@@ -1,0 +1,30 @@
+service: 'nest-serverless'
+
+plugins:
+  - serverless-offline
+  - serverless-plugin-typescript
+
+custom:
+  myStage: ${opt:stage, self:provider.stage}
+  serverless-offline:
+    httpPort: 4000
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: ${opt:stage, 'local'}
+  environment: ${file(env.yml):${self:custom.myStage}}
+
+
+functions:
+  nest-app:
+    handler: src/handler.eventHandler
+    timeout: 100
+    events:
+      - http:
+          path: /{proxy+}
+          method: any
+          cors:
+            origin: '*'
+            headers:
+              - Origin
